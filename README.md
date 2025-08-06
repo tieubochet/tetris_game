@@ -2,6 +2,9 @@
 
 A classic Tetris game built from the ground up with React, TypeScript, and Tailwind CSS. This project showcases the use of modern React features like Hooks to manage complex game state and logic in a clean, functional, and organized way.
 
+![React Tetris Gameplay](https://i.imgur.com/E5s7x4B.png)
+*(Feel free to replace this with a screenshot or GIF of your actual game)*
+
 ## 🚀 Features
 
 -   **Classic Tetris Gameplay**: Move and rotate falling tetrominos to complete horizontal lines.
@@ -30,9 +33,10 @@ You need to have [Node.js](https://nodejs.org/en/) (which includes npm) installe
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/tieubochet/tetris_game.git
+    git clone https://github.com/your-username/tetris_game.git
     cd tetris_game
     ```
+    *(Replace `your-username` with your actual GitHub username)*
 
 2.  **Install NPM packages:**
     ```bash
