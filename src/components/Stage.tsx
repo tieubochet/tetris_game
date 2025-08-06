@@ -9,7 +9,7 @@ interface StageProps {
 const Stage: React.FC<StageProps> = ({ stage }) => {
   return (
     <div 
-        className="grid gap-px border-4 border-gray-700 bg-gray-900"
+        className="grid gap-px border-2 border-gray-700 bg-black"
         style={{
             gridTemplateRows: `repeat(${stage.length}, 1fr)`,
             gridTemplateColumns: `repeat(${stage[0].length}, 1fr)`
