@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { createStage } from '../services/gameHelpers';
 import { Player, Stage, StageCell, TetrominoKey } from '../types';
 
