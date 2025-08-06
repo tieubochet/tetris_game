@@ -1,0 +1,5 @@
+{
+  "name": "React Tetris",
+  "description": "A classic Tetris game built with React, TypeScript, and Tailwind CSS. Use the arrow keys to move and rotate the pieces, and try to clear as many lines as possible.",
+  "requestFramePermissions": []
+}
