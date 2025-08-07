@@ -59,7 +59,7 @@ const Tetris: React.FC = () => {
 
   const keyUp = ({ keyCode }: { keyCode: number }) => {
     if (!gameOver) {
-      if (keyCode === 40) {
+      if (keyCode === 83) { // S key
         setDropTime(1000 / (level + 1) + 200);
       }
     }
@@ -72,13 +72,13 @@ const Tetris: React.FC = () => {
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
     if (!gameOver) {
-      if (keyCode === 37) {
+      if (keyCode === 65) { // A key
         movePlayer(-1);
-      } else if (keyCode === 39) {
+      } else if (keyCode === 68) { // D key
         movePlayer(1);
-      } else if (keyCode === 40) {
+      } else if (keyCode === 83) { // S key
         dropPlayer();
-      } else if (keyCode === 38) {
+      } else if (keyCode === 87) { // W key
         playerRotate(stage, 1);
       }
     }
@@ -119,10 +119,10 @@ const Tetris: React.FC = () => {
         <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
           <h3 className="font-bold text-white mb-2 text-center">Controls</h3>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">&uarr;</span> Rotate</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">&darr;</span> Drop</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">&larr;</span> Left</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">&rarr;</span> Right</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">W</span> Rotate</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">S</span> Drop</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">A</span> Left</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">D</span> Right</p>
           </div>
         </div>
       </div>
