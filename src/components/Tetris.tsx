@@ -1,4 +1,4 @@
-import React, 'react';
+import React from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
