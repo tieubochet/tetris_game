@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
@@ -14,15 +15,14 @@ import StartButton from './StartButton';
 const Tetris: React.FC = () => {
   const [dropTime, setDropTime] = React.useState<number | null>(null);
   const [gameOver, setGameOver] = React.useState(true);
+  const [isPaused, setIsPaused] = React.useState(false);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   
-  // Signal to the Farcaster client that the app is ready to be displayed.
   React.useEffect(() => {
     sdk.actions.ready();
-    // Focus the game area to receive key events
     const gameArea = document.getElementById('game-area');
     if (gameArea) {
       gameArea.focus();
@@ -40,10 +40,10 @@ const Tetris: React.FC = () => {
     setDropTime(1000);
     resetPlayer();
     setGameOver(false);
+    setIsPaused(false);
     setScore(0);
     setRows(0);
     setLevel(0);
-     // Focus the game area to receive key events
     const gameArea = document.getElementById('game-area');
     if (gameArea) {
       gameArea.focus();
@@ -67,8 +67,22 @@ const Tetris: React.FC = () => {
     }
   };
 
-  const keyUp = ({ keyCode }: { keyCode: number }) => {
+  const togglePause = () => {
     if (!gameOver) {
+      setIsPaused(prev => {
+        const nextPaused = !prev;
+        if (nextPaused) {
+          setDropTime(null);
+        } else {
+          setDropTime(1000 / (level + 1) + 200);
+        }
+        return nextPaused;
+      });
+    }
+  };
+
+  const keyUp = ({ keyCode }: { keyCode: number }) => {
+    if (!gameOver && !isPaused) {
       if (keyCode === 83) { // S key
         setDropTime(1000 / (level + 1) + 200);
       }
@@ -82,6 +96,12 @@ const Tetris: React.FC = () => {
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
     if (!gameOver) {
+      if (keyCode === 80) { // P key
+        togglePause();
+        return;
+      }
+      if (isPaused) return;
+
       if (keyCode === 65) { // A key
         movePlayer(-1);
       } else if (keyCode === 68) { // D key
@@ -108,8 +128,13 @@ const Tetris: React.FC = () => {
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <div className="w-52">
+      <div className="w-52 relative">
         <Stage stage={stage} />
+        {isPaused && (
+          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+            <p className="text-white text-2xl font-bold">PAUSED</p>
+          </div>
+        )}
       </div>
 
       <div className="w-52 flex flex-col gap-2">
@@ -128,13 +153,24 @@ const Tetris: React.FC = () => {
         
         <StartButton callback={startGame} />
 
+        {!gameOver && (
+          <button
+            onClick={togglePause}
+            className="w-full px-4 py-2 text-lg font-bold text-white bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none transition-colors duration-200"
+            aria-label={isPaused ? 'Resume Game' : 'Pause Game'}
+          >
+            {isPaused ? 'Resume' : 'Pause'}
+          </button>
+        )}
+
         <div className="text-gray-400 text-xs p-2 bg-gray-800 rounded-md">
           <h3 className="font-bold text-white mb-1 text-center">Controls</h3>
-          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+          <div className="flex flex-col gap-1">
             <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Drop</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Left</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Right</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
           </div>
         </div>
       </div>
