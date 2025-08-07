@@ -7,9 +7,9 @@ interface DisplayProps {
 
 const Display: React.FC<DisplayProps> = ({ label, value }) => {
   return (
-    <div className="flex items-center justify-between w-full px-3 py-2 bg-gray-800 rounded-md">
-      <p className="font-mono text-gray-400 text-sm uppercase tracking-wider">{label}</p>
-      <p className="font-mono text-lg font-bold text-white">{value}</p>
+    <div className="flex items-center justify-between w-full px-2 py-1 bg-gray-800 rounded-md">
+      <p className="font-mono text-gray-400 text-xs uppercase tracking-wider">{label}</p>
+      <p className="font-mono text-base font-bold text-white">{value}</p>
     </div>
   );
 };
