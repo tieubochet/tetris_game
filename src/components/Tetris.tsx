@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
@@ -12,16 +12,21 @@ import Display from './Display';
 import StartButton from './StartButton';
 
 const Tetris: React.FC = () => {
-  const [dropTime, setDropTime] = useState<number | null>(null);
-  const [gameOver, setGameOver] = useState(true);
+  const [dropTime, setDropTime] = React.useState<number | null>(null);
+  const [gameOver, setGameOver] = React.useState(true);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   
   // Signal to the Farcaster client that the app is ready to be displayed.
-  useEffect(() => {
+  React.useEffect(() => {
     sdk.actions.ready();
+    // Focus the game area to receive key events
+    const gameArea = document.getElementById('game-area');
+    if (gameArea) {
+      gameArea.focus();
+    }
   }, []);
 
   const movePlayer = (dir: number) => {
@@ -30,7 +35,7 @@ const Tetris: React.FC = () => {
     }
   };
 
-  const startGame = useCallback(() => {
+  const startGame = React.useCallback(() => {
     setStage(createStage());
     setDropTime(1000);
     resetPlayer();
@@ -38,6 +43,11 @@ const Tetris: React.FC = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
+     // Focus the game area to receive key events
+    const gameArea = document.getElementById('game-area');
+    if (gameArea) {
+      gameArea.focus();
+    }
   }, [resetPlayer, setLevel, setRows, setScore, setStage]);
 
   const drop = () => {
@@ -90,21 +100,23 @@ const Tetris: React.FC = () => {
   
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-between outline-none"
+      id="game-area"
+      className="w-full h-full flex flex-col items-center justify-center gap-3 outline-none"
       role="button"
       tabIndex={0}
       onKeyDown={e => move(e)}
       onKeyUp={keyUp}
+      aria-label="Game Area"
     >
-      <div className="flex-shrink-0">
+      <div className="w-52">
         <Stage stage={stage} />
       </div>
 
-      <div className="w-full flex flex-col gap-3">
+      <div className="w-52 flex flex-col gap-2">
         {gameOver ? (
           <div className="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-md text-center">
-            <h2 className="text-2xl font-bold text-red-500">Game Over</h2>
-            <p className="text-gray-300 mt-1">Final Score: {score}</p>
+            <h2 className="text-xl font-bold text-red-500">Game Over</h2>
+            <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -116,13 +128,13 @@ const Tetris: React.FC = () => {
         
         <StartButton callback={startGame} />
 
-        <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
-          <h3 className="font-bold text-white mb-2 text-center">Controls</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">W</span> Rotate</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">S</span> Drop</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">A</span> Left</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-lg">D</span> Right</p>
+        <div className="text-gray-400 text-xs p-2 bg-gray-800 rounded-md">
+          <h3 className="font-bold text-white mb-1 text-center">Controls</h3>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Drop</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Left</p>
+            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Right</p>
           </div>
         </div>
       </div>
