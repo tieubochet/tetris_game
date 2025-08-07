@@ -120,22 +120,22 @@ const Tetris: React.FC = () => {
   return (
     <div
       id="game-area"
-      className="w-full h-full flex flex-row justify-center gap-4 outline-none"
+      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none"
       role="button"
       tabIndex={0}
       onKeyDown={e => move(e)}
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <div className="flex-grow relative">
+      <div className="w-full max-w-sm relative">
         <Stage stage={stage} />
         {isPaused && (
-          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center rounded-lg">
             <p className="text-white text-2xl font-bold">PAUSED</p>
           </div>
         )}
          {gameOver && !isPaused && (
-          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center">
+          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
             <div>
               <h2 className="text-xl font-bold text-red-500">Game Over</h2>
               <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
@@ -144,17 +144,14 @@ const Tetris: React.FC = () => {
         )}
       </div>
 
-      <aside className="w-40 flex-shrink-0 flex flex-col gap-3">
-        <div>
+      <aside className="w-full max-w-sm flex flex-col gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <Display label="Score" value={score} />
-          <div className="my-1"></div>
           <Display label="Rows" value={rows} />
-          <div className="my-1"></div>
           <Display label="Level" value={level} />
         </div>
         
         <StartButton callback={startGame} />
-
         {!gameOver && (
           <button
             onClick={togglePause}
@@ -165,14 +162,14 @@ const Tetris: React.FC = () => {
           </button>
         )}
 
-        <div className="text-gray-400 text-xs p-2 bg-gray-800 rounded-md mt-auto">
-          <h3 className="font-bold text-white mb-1 text-center">Controls</h3>
-          <div className="flex flex-col gap-1">
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
-            <p className="flex items-center gap-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
+        <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
+          <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
+            <p className="flex items-center gap-2 col-span-2 justify-center mt-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
           </div>
         </div>
       </aside>
