@@ -1,17 +1,27 @@
-
 import React from 'react';
 
 interface StartButtonProps {
   callback: () => void;
+  text: string;
+  variant?: 'primary' | 'secondary';
+  ariaLabel?: string;
 }
 
-const StartButton: React.FC<StartButtonProps> = ({ callback }) => {
+const StartButton: React.FC<StartButtonProps> = ({ callback, text, variant = 'primary', ariaLabel }) => {
+  const baseClasses = "w-full px-4 py-2 text-lg font-bold text-white rounded-md focus:outline-none transition-colors duration-200";
+  
+  const colorClasses = {
+    primary: "bg-blue-600 hover:bg-blue-500",
+    secondary: "bg-gray-600 hover:bg-gray-500"
+  };
+  
   return (
     <button
-      className="w-full px-4 py-3 my-4 text-xl font-bold text-white bg-blue-600 border-4 border-blue-800 rounded-md hover:bg-blue-500 focus:outline-none transition-colors duration-200"
+      className={`${baseClasses} ${colorClasses[variant]}`}
       onClick={callback}
+      aria-label={ariaLabel || text}
     >
-      Start Game
+      {text}
     </button>
   );
 };
