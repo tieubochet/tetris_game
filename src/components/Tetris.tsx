@@ -20,12 +20,11 @@ const Tetris: React.FC = () => {
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   
+  const gameAreaRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
     sdk.actions.ready();
-    const gameArea = document.getElementById('game-area');
-    if (gameArea) {
-      gameArea.focus();
-    }
+    gameAreaRef.current?.focus();
   }, []);
 
   const movePlayer = (dir: number) => {
@@ -43,10 +42,7 @@ const Tetris: React.FC = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
-    const gameArea = document.getElementById('game-area');
-    if (gameArea) {
-      gameArea.focus();
-    }
+    gameAreaRef.current?.focus();
   }, [resetPlayer, setLevel, setRows, setScore, setStage]);
 
   const drop = () => {
@@ -66,50 +62,54 @@ const Tetris: React.FC = () => {
     }
   };
 
-  const togglePause = () => {
+  const togglePause = React.useCallback(() => {
     if (!gameOver) {
       setIsPaused(prev => {
-        const nextPaused = !prev;
-        if (nextPaused) {
+        const nextPausedState = !prev;
+        if (nextPausedState) {
           setDropTime(null);
         } else {
           setDropTime(1000 / (level + 1) + 200);
+          gameAreaRef.current?.focus();
         }
-        return nextPaused;
+        return nextPausedState;
       });
     }
-  };
+  }, [gameOver, level]);
 
   const keyUp = ({ keyCode }: { keyCode: number }) => {
     if (!gameOver && !isPaused) {
-      if (keyCode === 83) { // S key
+      if (keyCode === 83) { // S key - soft drop release
         setDropTime(1000 / (level + 1) + 200);
       }
     }
   };
 
   const dropPlayer = () => {
-    setDropTime(null);
-    drop();
+     if (!isPaused) {
+        setDropTime(null);
+        drop();
+     }
   };
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
-    if (!gameOver) {
-      if (keyCode === 80) { // P key
-        togglePause();
-        return;
-      }
-      if (isPaused) return;
+    if (gameOver) return;
 
-      if (keyCode === 65) { // A key
-        movePlayer(-1);
-      } else if (keyCode === 68) { // D key
-        movePlayer(1);
-      } else if (keyCode === 83) { // S key
-        dropPlayer();
-      } else if (keyCode === 87) { // W key
-        playerRotate(stage, 1);
-      }
+    if (keyCode === 80) { // P key
+      togglePause();
+      return;
+    }
+
+    if (isPaused) return;
+
+    if (keyCode === 65) { // A key
+      movePlayer(-1);
+    } else if (keyCode === 68) { // D key
+      movePlayer(1);
+    } else if (keyCode === 83) { // S key
+      dropPlayer();
+    } else if (keyCode === 87) { // W key
+      playerRotate(stage, 1);
     }
   };
 
@@ -117,9 +117,27 @@ const Tetris: React.FC = () => {
     drop();
   }, dropTime);
   
+  const getButtonProps = () => {
+    if (gameOver) {
+      return {
+        callback: startGame,
+        text: 'Start Game',
+        variant: 'primary' as const,
+        ariaLabel: 'Start a new game of Tetris'
+      };
+    }
+    return {
+      callback: togglePause,
+      text: isPaused ? 'Resume' : 'Pause',
+      variant: 'secondary' as const,
+      ariaLabel: isPaused ? 'Resume Game' : 'Pause Game'
+    };
+  };
+
   return (
     <div
       id="game-area"
+      ref={gameAreaRef}
       className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none"
       role="button"
       tabIndex={0}
@@ -129,17 +147,16 @@ const Tetris: React.FC = () => {
     >
       <div className="w-full max-w-sm relative">
         <Stage stage={stage} />
-        {isPaused && (
-          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center rounded-lg">
-            <p className="text-white text-2xl font-bold">PAUSED</p>
-          </div>
-        )}
-         {gameOver && !isPaused && (
+        {gameOver ? (
           <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
             <div>
               <h2 className="text-xl font-bold text-red-500">Game Over</h2>
               <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
             </div>
+          </div>
+        ) : isPaused && (
+          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center rounded-lg">
+            <p className="text-white text-2xl font-bold">PAUSED</p>
           </div>
         )}
       </div>
@@ -151,16 +168,7 @@ const Tetris: React.FC = () => {
           <Display label="Level" value={level} />
         </div>
         
-        <StartButton callback={startGame} />
-        {!gameOver && (
-          <button
-            onClick={togglePause}
-            className="w-full px-4 py-2 text-lg font-bold text-white bg-gray-600 rounded-md hover:bg-gray-500 focus:outline-none transition-colors duration-200"
-            aria-label={isPaused ? 'Resume Game' : 'Pause Game'}
-          >
-            {isPaused ? 'Resume' : 'Pause'}
-          </button>
-        )}
+        <StartButton {...getButtonProps()} />
 
         <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
           <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
