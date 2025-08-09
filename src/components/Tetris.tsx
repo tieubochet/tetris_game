@@ -123,23 +123,6 @@ const Tetris: React.FC = () => {
     drop();
   }, dropTime);
   
-  const getButtonProps = () => {
-    if (gameOver) {
-      return {
-        callback: startGame,
-        text: 'Start Game',
-        variant: 'primary' as const,
-        ariaLabel: 'Start a new game of Tetris'
-      };
-    }
-    return {
-      callback: togglePause,
-      text: isPaused ? 'Resume' : 'Pause',
-      variant: 'secondary' as const,
-      ariaLabel: isPaused ? 'Resume Game' : 'Pause Game'
-    };
-  };
-
   return (
     <div
       id="game-area"
@@ -174,7 +157,21 @@ const Tetris: React.FC = () => {
           <Display label="Level" value={level} />
         </div>
         
-        <StartButton {...getButtonProps()} />
+        {gameOver ? (
+          <StartButton
+            callback={startGame}
+            text="Start Game"
+            variant="primary"
+            ariaLabel="Start a new game of Tetris"
+          />
+        ) : (
+          <StartButton
+            callback={togglePause}
+            text={isPaused ? 'Resume' : 'Pause'}
+            variant="secondary"
+            ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
+          />
+        )}
 
         <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
           <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
