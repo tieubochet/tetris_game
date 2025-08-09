@@ -27,6 +27,14 @@ const Tetris: React.FC = () => {
     gameAreaRef.current?.focus();
   }, []);
 
+  // Effect to handle focusing the game area when the game starts or resumes.
+  // This separates focus logic from game state logic, which can prevent race conditions.
+  React.useEffect(() => {
+    if (!gameOver && !isPaused) {
+      gameAreaRef.current?.focus();
+    }
+  }, [gameOver, isPaused]);
+
   const movePlayer = (dir: number) => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
       updatePlayerPos(dir, 0, false);
@@ -42,7 +50,6 @@ const Tetris: React.FC = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
-    gameAreaRef.current?.focus();
   }, [resetPlayer, setLevel, setRows, setScore, setStage]);
 
   const drop = () => {
@@ -70,7 +77,6 @@ const Tetris: React.FC = () => {
           setDropTime(null);
         } else {
           setDropTime(1000 / (level + 1) + 200);
-          gameAreaRef.current?.focus();
         }
         return nextPausedState;
       });
