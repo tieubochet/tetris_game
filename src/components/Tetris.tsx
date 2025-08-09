@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
@@ -12,24 +12,24 @@ import Display from './Display';
 import StartButton from './StartButton';
 
 const Tetris: React.FC = () => {
-  const [dropTime, setDropTime] = React.useState<number | null>(null);
-  const [gameOver, setGameOver] = React.useState(true);
-  const [isPaused, setIsPaused] = React.useState(false);
+  const [dropTime, setDropTime] = useState<number | null>(null);
+  const [gameOver, setGameOver] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   
-  const gameAreaRef = React.useRef<HTMLDivElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     sdk.actions.ready();
     gameAreaRef.current?.focus();
   }, []);
 
   // Effect to handle focusing the game area when the game starts or resumes.
   // This separates focus logic from game state logic, which can prevent race conditions.
-  React.useEffect(() => {
+  useEffect(() => {
     if (!gameOver && !isPaused) {
       gameAreaRef.current?.focus();
     }
@@ -41,7 +41,7 @@ const Tetris: React.FC = () => {
     }
   };
 
-  const startGame = React.useCallback(() => {
+  const startGame = useCallback(() => {
     setStage(createStage());
     setDropTime(1000);
     resetPlayer();
@@ -69,7 +69,7 @@ const Tetris: React.FC = () => {
     }
   };
 
-  const togglePause = React.useCallback(() => {
+  const togglePause = useCallback(() => {
     if (!gameOver) {
       setIsPaused(prev => {
         const nextPausedState = !prev;
