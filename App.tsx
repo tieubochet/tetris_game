@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
-import { preconnect } from 'react-dom';
 import Tetris from './components/Tetris';
 import Leaderboard from './components/Leaderboard';
 
@@ -13,7 +12,10 @@ const App: React.FC = () => {
     // Asynchronously call ready to show the app
     sdk.actions.ready();
     // Preconnect to auth server for faster auth, as recommended
-    preconnect("https://auth.farcaster.xyz");
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = 'https://auth.farcaster.xyz';
+    document.head.appendChild(link);
   }, []);
 
   const handleStartGame = () => setView('game');
