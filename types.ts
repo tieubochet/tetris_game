@@ -1,4 +1,3 @@
-
 export type TetrominoShape = (string | number)[][];
 
 export interface ITetromino {
@@ -22,4 +21,9 @@ export interface Player {
   };
   tetromino: TetrominoShape;
   collided: boolean;
+}
+
+export interface ScoreEntry {
+  name: string;
+  score: number;
 }
