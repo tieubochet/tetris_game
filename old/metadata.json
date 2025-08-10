@@ -1,0 +1,10 @@
+{
+  "name": "Tetris Game",
+  "description": "A classic Tetris game for Farcaster. Use W, A, S, D keys to move and rotate pieces, and P to pause. Clear lines to score points!",
+  "logo": "https://raw.githubusercontent.com/neynar-apps/react-tetris-farcaster/main/public/logo.png",
+  "version": "1.0.0",
+  "images": [
+    "https://raw.githubusercontent.com/neynar-apps/react-tetris-farcaster/main/public/screenshot.png"
+  ],
+  "requestFramePermissions": []
+}

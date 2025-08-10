@@ -1,0 +1,20 @@
+{
+  "frame": {
+    "name": "Tetris Classic Game",
+    "version": "1",
+    "iconUrl": "https://tetris-game-v2fr.vercel.app/icon.png",
+    "homeUrl": "https://tetris-game-v2fr.vercel.app",
+    "imageUrl": "https://tetris-game-v2fr.vercel.app/image.png",
+    "splashImageUrl": "https://tetris-game-v2fr.vercel.app/splash.png",
+    "splashBackgroundColor": "#000000",
+    "webhookUrl": "https://tetris-game-v2fr.vercel.app/api/webhook",
+    "subtitle": "A Modern Twist on a Retro Classic",
+    "primaryCategory": "games",
+    "description": "Experience the legendary block-stacking puzzle, rebuilt from the ground up for Farcaster! Maneuver falling Tetriminos with W, A, S, and D to create solid horizontal lines. Clear lines to boost your score, level up, and master the increasing speed. Press 'P' to pause the action. How high can you score?"
+  },
+  "accountAssociation": {
+    "header": "eyJmaWQiOjI2MDI5OSwidHlwZSI6ImF1dGgiLCJrZXkiOiIweGE1NjNDYTRFMGZmMjIzNjMzMkUyRkRmRDkxZkZEOTZlNTk0NzQ5RkYifQ",
+    "payload": "eyJkb21haW4iOiJ0ZXRyaXMtZ2FtZS12MmZyLnZlcmNlbC5hcHAifQ",
+    "signature": "WvbUZIOColF6OqJ49StBGbm98Jtrkj6/AepMBM2tXEZt8r3VXbLOVgX0vHgm3HLiu85nfsk7o+m7P2J/Nzvs3Bw="
+  }
+}

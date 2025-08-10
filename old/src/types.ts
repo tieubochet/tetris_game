@@ -23,7 +23,9 @@ export interface Player {
   collided: boolean;
 }
 
-export interface ScoreEntry {
-  name: string;
-  score: number;
+export interface FarcasterUser {
+  fid: number;
+  username?: string;
+  displayName?: string;
+  pfpUrl?: string;
 }
