@@ -1,7 +1,7 @@
 import { Player, Stage, StageCell } from '../types';
 
 export const STAGE_WIDTH = 12;
-export const STAGE_HEIGHT = 16;
+export const STAGE_HEIGHT = 20;
 
 export const createStage = (): Stage =>
   Array.from(Array(STAGE_HEIGHT), () =>
