@@ -10,11 +10,13 @@ import { useGameStatus } from '../hooks/useGameStatus';
 import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
+import HelpModal from './HelpModal';
 
 const Tetris: React.FC = () => {
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
@@ -27,8 +29,6 @@ const Tetris: React.FC = () => {
     gameAreaRef.current?.focus();
   }, []);
 
-  // Effect to handle focusing the game area when the game starts or resumes.
-  // This separates focus logic from game state logic, which can prevent race conditions.
   useEffect(() => {
     if (!gameOver && !isPaused) {
       gameAreaRef.current?.focus();
@@ -99,6 +99,11 @@ const Tetris: React.FC = () => {
   };
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
+    if (showHelp) { // Allow closing help with Escape key, for example
+      if (keyCode === 27) setShowHelp(false);
+      return;
+    }
+
     if (gameOver) return;
 
     if (keyCode === 80) { // P key
@@ -127,7 +132,7 @@ const Tetris: React.FC = () => {
     <div
       id="game-area"
       ref={gameAreaRef}
-      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none"
+      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none relative"
       role="button"
       tabIndex={0}
       onKeyDown={e => move(e)}
@@ -157,33 +162,35 @@ const Tetris: React.FC = () => {
           <Display label="Level" value={level} />
         </div>
         
-        {gameOver ? (
-          <StartButton
-            callback={startGame}
-            text="Start Game"
-            variant="primary"
-            ariaLabel="Start a new game of Tetris"
-          />
-        ) : (
-          <StartButton
-            callback={togglePause}
-            text={isPaused ? 'Resume' : 'Pause'}
-            variant="secondary"
-            ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
-          />
-        )}
-
-        <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
-          <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
-            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
-            <p className="flex items-center gap-2 col-span-2 justify-center mt-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
+        <div className="flex items-stretch gap-2">
+          <div className="flex-grow">
+            {gameOver ? (
+              <StartButton
+                callback={startGame}
+                text="Start Game"
+                variant="primary"
+                ariaLabel="Start a new game of Tetris"
+              />
+            ) : (
+              <StartButton
+                callback={togglePause}
+                text={isPaused ? 'Resume' : 'Pause'}
+                variant="secondary"
+                ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
+              />
+            )}
           </div>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="flex-shrink-0 w-12 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold text-2xl focus:outline-none focus:ring-4 focus:ring-gray-400 transition-all duration-200 ease-in-out shadow-md"
+            aria-label="Show controls help"
+          >
+            ?
+          </button>
         </div>
       </aside>
+
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 };
