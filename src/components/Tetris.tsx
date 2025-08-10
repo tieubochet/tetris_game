@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
@@ -14,7 +14,7 @@ interface TetrisProps {
   onGameOver: (score: number) => void;
 }
 
-const Tetris = ({ onGameOver }: TetrisProps) => {
+const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
 
