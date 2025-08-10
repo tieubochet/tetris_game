@@ -1,6 +1,6 @@
 import { ScoreEntry } from '../types';
 
-const LEADERBOARD_KEY = 'tetrisLeaderboard';
+const LEADERBOARD_KEY = 'react-tetris-leaderboard';
 const MAX_SCORES = 10;
 
 export const getScores = (): ScoreEntry[] => {
@@ -10,9 +10,14 @@ export const getScores = (): ScoreEntry[] => {
       return [];
     }
     const scores = JSON.parse(scoresJSON) as ScoreEntry[];
-    return scores.sort((a, b) => b.score - a.score);
+    // Ensure data integrity and sort
+    return scores
+      .filter(s => typeof s.name === 'string' && typeof s.score === 'number')
+      .sort((a, b) => b.score - a.score);
   } catch (error) {
-    console.error("Failed to get scores from localStorage", error);
+    console.error("Failed to retrieve scores from localStorage", error);
+    // Clear corrupted data
+    localStorage.removeItem(LEADERBOARD_KEY);
     return [];
   }
 };
@@ -22,7 +27,7 @@ export const addScore = (name: string, score: number): void => {
 
     try {
         const scores = getScores();
-        const newScore: ScoreEntry = { name: name.trim(), score };
+        const newScore: ScoreEntry = { name: name.trim() || 'Player', score };
 
         scores.push(newScore);
         
@@ -31,6 +36,6 @@ export const addScore = (name: string, score: number): void => {
         
         localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(topScores));
     } catch (error) {
-        console.error("Failed to add score to localStorage", error);
+        console.error("Failed to save score to localStorage", error);
     }
 };

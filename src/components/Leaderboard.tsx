@@ -15,25 +15,25 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ onStartGame }) => {
   }, []);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-between p-4">
+    <div className="w-full h-full flex flex-col items-center justify-between p-1">
       <div className="w-full">
         <h2 className="text-2xl font-bold text-center mb-4 tracking-widest text-cyan-400">LEADERBOARD</h2>
-        <div className="bg-gray-800 rounded-lg p-3 text-sm h-80 overflow-y-auto">
+        <div className="bg-gray-800 rounded-lg p-3 text-sm h-96 overflow-y-auto">
           {scores.length > 0 ? (
             <ol className="space-y-2 text-gray-300">
               {scores.map((entry, index) => (
-                <li key={index} className="flex justify-between items-center text-base font-mono border-b border-gray-700 pb-1.5 pt-0.5">
+                <li key={index} className="flex justify-between items-center text-base font-mono border-b border-gray-700 pb-2 pt-1">
                   <span className="flex items-center overflow-hidden">
-                    <span className="text-cyan-400 font-bold w-6 text-left">{index + 1}.</span>
+                    <span className="text-cyan-400 font-bold w-7 text-left">{index + 1}.</span>
                     <span className="truncate" title={entry.name}>{entry.name}</span>
                   </span>
-                  <span className="font-bold text-yellow-400">{entry.score}</span>
+                  <span className="font-bold text-yellow-400">{entry.score.toLocaleString()}</span>
                 </li>
               ))}
             </ol>
           ) : (
             <div className="flex items-center justify-center h-full">
-                <p className="text-center text-gray-500">No scores yet. Be the first!</p>
+                <p className="text-center text-gray-500 italic">No scores yet. Be the first!</p>
             </div>
           )}
         </div>
