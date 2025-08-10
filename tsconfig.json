@@ -17,5 +17,14 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "App.tsx",
+    "index.tsx",
+    "types.ts",
+    "components",
+    "hooks",
+    "services"
+  ],
   "references": []
 }

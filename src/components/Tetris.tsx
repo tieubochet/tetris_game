@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
 import { usePlayer } from '../hooks/usePlayer';
@@ -9,6 +8,7 @@ import { useGameStatus } from '../hooks/useGameStatus';
 
 import Stage from './Stage';
 import Display from './Display';
+import StartButton from './StartButton';
 
 interface TetrisProps {
   onGameOver: (score: number) => void;
@@ -17,6 +17,7 @@ interface TetrisProps {
 const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
@@ -25,7 +26,6 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
   const gameAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    sdk.actions.ready();
     gameAreaRef.current?.focus();
     startGame();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -42,6 +42,7 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
     setDropTime(1000);
     resetPlayer();
     setGameOver(false);
+    setIsPaused(false);
     setScore(0);
     setRows(0);
     setLevel(0);
@@ -65,9 +66,24 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
       updatePlayerPos(0, 0, true);
     }
   };
+  
+  const togglePause = () => {
+    if (!gameOver) {
+      setIsPaused(prev => {
+        const nextPausedState = !prev;
+        if (nextPausedState) {
+          setDropTime(null);
+        } else {
+          setDropTime(1000 / (level + 1) + 200);
+          gameAreaRef.current?.focus();
+        }
+        return nextPausedState;
+      });
+    }
+  };
 
   const keyUp = ({ keyCode }: { keyCode: number }) => {
-    if (!gameOver) {
+    if (!gameOver && !isPaused) {
       if (keyCode === 83) { // S key - soft drop release
         setDropTime(1000 / (level + 1) + 200);
       }
@@ -75,12 +91,21 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
   };
 
   const dropPlayer = () => {
-     setDropTime(null);
-     drop();
+     if (!isPaused) {
+        setDropTime(null);
+        drop();
+     }
   };
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
     if (gameOver) return;
+
+    if (keyCode === 80) { // P key
+      togglePause();
+      return;
+    }
+
+    if (isPaused) return;
 
     if (keyCode === 65) { // A key
       movePlayer(-1);
@@ -97,12 +122,6 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
     drop();
   }, dropTime);
 
-  useEffect(() => {
-    if (gameOver) {
-      // Logic to handle game over, e.g. call onGameOver
-    }
-  }, [gameOver, onGameOver, score]);
-
   return (
     <div
       id="game-area"
@@ -114,20 +133,41 @@ const Tetris: React.FC<TetrisProps> = ({ onGameOver }) => {
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <div className="w-full max-w-sm flex-grow">
+      <div className="w-full max-w-sm relative">
         <Stage stage={stage} />
-      </div>
-      
-      <aside className="w-full max-w-sm">
-        {gameOver ? (
-            <Display gameOver={gameOver} text={`Final Score: ${score}`} />
-        ) : (
-            <div className="grid grid-cols-3 gap-2 mb-4">
-                <Display label="Score" value={score} />
-                <Display label="Rows" value={rows} />
-                <Display label="Level" value={level} />
-            </div>
+        {isPaused && !gameOver && (
+          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center rounded-lg">
+            <p className="text-white text-2xl font-bold">PAUSED</p>
+          </div>
         )}
+      </div>
+
+      <aside className="w-full max-w-sm flex flex-col gap-3">
+        <div className="grid grid-cols-3 gap-2">
+          <Display label="Score" value={score} />
+          <Display label="Rows" value={rows} />
+          <Display label="Level" value={level} />
+        </div>
+        
+        {!gameOver && (
+          <StartButton 
+            callback={togglePause} 
+            text={isPaused ? 'Resume' : 'Pause'}
+            variant='secondary'
+            ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
+          />
+        )}
+
+        <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
+          <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
+            <p className="flex items-center gap-2 col-span-2 justify-center mt-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
+          </div>
+        </div>
       </aside>
     </div>
   );
