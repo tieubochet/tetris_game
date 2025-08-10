@@ -23,14 +23,9 @@ export interface Player {
   collided: boolean;
 }
 
-export interface ScoreEntry {
-  name: string;
-  score: number;
-}
-
-// Farcaster user data structure
 export interface FarcasterUser {
-  pfp?: string;
-  displayName?: string;
   fid: number;
+  username?: string;
+  displayName?: string;
+  pfpUrl?: string;
 }

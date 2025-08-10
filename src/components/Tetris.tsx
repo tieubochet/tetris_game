@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { sdk } from '@farcaster/miniapp-sdk';
 
 import { createStage, checkCollision } from '../services/gameHelpers';
 import { usePlayer } from '../hooks/usePlayer';
@@ -10,27 +11,29 @@ import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
 import HelpModal from './HelpModal';
-import { FarcasterUser } from '../types';
 
-interface TetrisProps {
-  user: FarcasterUser | null;
-}
-
-const Tetris: React.FC<TetrisProps> = ({ user }) => {
-  const [dropTime, setDropTime] = React.useState<number | null>(null);
-  const [gameOver, setGameOver] = React.useState(true);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+const Tetris: React.FC = () => {
+  const [dropTime, setDropTime] = useState<number | null>(null);
+  const [gameOver, setGameOver] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
   const [score, setScore, rows, setRows, level, setLevel] = useGameStatus(rowsCleared);
   
-  const gameAreaRef = React.useRef<HTMLDivElement>(null);
+  const gameAreaRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    sdk.actions.ready();
     gameAreaRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!gameOver && !isPaused) {
+      gameAreaRef.current?.focus();
+    }
+  }, [gameOver, isPaused]);
 
   const movePlayer = (dir: number) => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
@@ -38,7 +41,7 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
     }
   };
 
-  const startGame = React.useCallback(() => {
+  const startGame = useCallback(() => {
     setStage(createStage());
     setDropTime(1000);
     resetPlayer();
@@ -47,7 +50,6 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
     setScore(0);
     setRows(0);
     setLevel(0);
-    gameAreaRef.current?.focus();
   }, [resetPlayer, setLevel, setRows, setScore, setStage]);
 
   const drop = () => {
@@ -67,7 +69,7 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
     }
   };
 
-  const togglePause = () => {
+  const togglePause = useCallback(() => {
     if (!gameOver) {
       setIsPaused(prev => {
         const nextPausedState = !prev;
@@ -75,12 +77,11 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
           setDropTime(null);
         } else {
           setDropTime(1000 / (level + 1) + 200);
-          gameAreaRef.current?.focus();
         }
         return nextPausedState;
       });
     }
-  };
+  }, [gameOver, level]);
 
   const keyUp = ({ keyCode }: { keyCode: number }) => {
     if (!gameOver && !isPaused) {
@@ -98,7 +99,12 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
   };
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
-    if (gameOver || isHelpOpen) return;
+    if (showHelp) { // Allow closing help with Escape key, for example
+      if (keyCode === 27) setShowHelp(false);
+      return;
+    }
+
+    if (gameOver) return;
 
     if (keyCode === 80) { // P key
       togglePause();
@@ -122,42 +128,23 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
     drop();
   }, dropTime);
   
-  const getButtonProps = () => {
-    if (gameOver) {
-      return {
-        callback: startGame,
-        text: 'Start Game',
-        variant: 'primary' as const,
-        ariaLabel: 'Start a new game of Tetris'
-      };
-    }
-    return {
-      callback: togglePause,
-      text: isPaused ? 'Resume' : 'Pause',
-      variant: 'secondary' as const,
-      ariaLabel: isPaused ? 'Resume Game' : 'Pause Game'
-    };
-  };
-
   return (
     <div
       id="game-area"
       ref={gameAreaRef}
-      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none"
+      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none relative"
       role="button"
       tabIndex={0}
       onKeyDown={e => move(e)}
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
-      <div className="w-full max-w-sm relative">
+      <div className="w-full max-w-xs relative">
         <Stage stage={stage} />
         {gameOver ? (
           <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
             <div>
               <h2 className="text-xl font-bold text-red-500">Game Over</h2>
-              {user && <p className="text-lg text-white mt-2">{user.displayName}</p>}
               <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
             </div>
           </div>
@@ -168,26 +155,42 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
         )}
       </div>
 
-      <aside className="w-full max-w-sm flex flex-col gap-3">
+      <aside className="w-full max-w-xs flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
           <Display label="Score" value={score} />
           <Display label="Rows" value={rows} />
           <Display label="Level" value={level} />
         </div>
         
-        <div className="flex items-center gap-2">
-            <div className="flex-grow">
-              <StartButton {...getButtonProps()} />
-            </div>
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              aria-label="Open help"
-              className="flex-shrink-0 h-12 w-12 flex items-center justify-center bg-gray-600 hover:bg-gray-500 focus:ring-gray-400 text-lg font-bold text-white rounded-lg focus:outline-none focus:ring-4 transition-all duration-200 ease-in-out shadow-md"
-            >
-              ?
-            </button>
+        <div className="flex items-stretch gap-2">
+          <div className="flex-grow">
+            {gameOver ? (
+              <StartButton
+                callback={startGame}
+                text="Start Game"
+                variant="primary"
+                ariaLabel="Start a new game of Tetris"
+              />
+            ) : (
+              <StartButton
+                callback={togglePause}
+                text={isPaused ? 'Resume' : 'Pause'}
+                variant="secondary"
+                ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
+              />
+            )}
+          </div>
+          <button
+            onClick={() => setShowHelp(true)}
+            className="flex-shrink-0 w-12 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold text-2xl focus:outline-none focus:ring-4 focus:ring-gray-400 transition-all duration-200 ease-in-out shadow-md"
+            aria-label="Show controls help"
+          >
+            ?
+          </button>
         </div>
       </aside>
+
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 };
