@@ -134,7 +134,7 @@ const Tetris: React.FC = () => {
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <div className="w-full max-w-sm relative">
+      <div className="w-full max-w-[228px] relative">
         <Stage stage={stage} />
         {gameOver ? (
           <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
@@ -150,7 +150,7 @@ const Tetris: React.FC = () => {
         )}
       </div>
 
-      <aside className="w-full max-w-sm flex flex-col gap-3">
+      <aside className="w-full max-w-[228px] flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
           <Display label="Score" value={score} />
           <Display label="Rows" value={rows} />
