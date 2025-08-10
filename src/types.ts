@@ -22,3 +22,10 @@ export interface Player {
   tetromino: TetrominoShape;
   collided: boolean;
 }
+
+export interface FarcasterUser {
+  fid: number;
+  username?: string;
+  displayName?: string;
+  pfpUrl?: string;
+}
