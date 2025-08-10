@@ -27,12 +27,12 @@ const App: React.FC = () => {
   React.useEffect(() => {
     sdk.actions.ready();
     // Check for existing user data
-    sdk.user.getUserInfo().then(handleSetUser).catch(console.error);
+    sdk.getFarcasterUser().then(handleSetUser).catch(console.error);
   }, []);
 
   const handleLogin = () => {
-    // Calling getUserInfo again will prompt for login if needed
-    sdk.user.getUserInfo().then(handleSetUser).catch((error) => console.error("Login failed:", error));
+    // Calling getFarcasterUser again will prompt for login if needed
+    sdk.getFarcasterUser().then(handleSetUser).catch((error: any) => console.error("Login failed:", error));
   };
 
   return (
