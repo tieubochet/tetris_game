@@ -6,17 +6,21 @@ import { usePlayer } from '../hooks/usePlayer';
 import { useStage } from '../hooks/useStage';
 import { useInterval } from '../hooks/useInterval';
 import { useGameStatus } from '../hooks/useGameStatus';
+import { addScore } from '../services/leaderboardService';
 
 import Stage from './Stage';
 import Display from './Display';
 import StartButton from './StartButton';
-import HelpModal from './HelpModal';
 
-const Tetris: React.FC = () => {
+interface TetrisProps {
+  onGoHome: () => void;
+}
+
+const Tetris: React.FC<TetrisProps> = ({ onGoHome }) => {
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
+  const [playerName, setPlayerName] = useState('Player');
 
   const [player, playerRotate, updatePlayerPos, resetPlayer] = usePlayer();
   const [stage, setStage, rowsCleared] = useStage(player, resetPlayer);
@@ -50,6 +54,7 @@ const Tetris: React.FC = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
+    setPlayerName('Player');
   }, [resetPlayer, setLevel, setRows, setScore, setStage]);
 
   const drop = () => {
@@ -85,7 +90,7 @@ const Tetris: React.FC = () => {
 
   const keyUp = ({ keyCode }: { keyCode: number }) => {
     if (!gameOver && !isPaused) {
-      if (keyCode === 83) { // S key - soft drop release
+      if (keyCode === 83) { // S key
         setDropTime(1000 / (level + 1) + 200);
       }
     }
@@ -99,11 +104,6 @@ const Tetris: React.FC = () => {
   };
 
   const move = ({ keyCode }: { keyCode: number; repeat?: boolean }) => {
-    if (showHelp) { // Allow closing help with Escape key, for example
-      if (keyCode === 27) setShowHelp(false);
-      return;
-    }
-
     if (gameOver) return;
 
     if (keyCode === 80) { // P key
@@ -123,74 +123,109 @@ const Tetris: React.FC = () => {
       playerRotate(stage, 1);
     }
   };
+  
+  const handleSaveScore = () => {
+    addScore(playerName, score);
+    onGoHome();
+  };
 
   useInterval(() => {
     drop();
   }, dropTime);
+
+  if (gameOver && score > 0) {
+    // Post-game screen
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-sm text-center">
+            <h2 className="text-3xl font-bold text-red-500 mb-4">Game Over</h2>
+            <p className="text-gray-300 text-xl mb-4">Final Score: <span className="text-yellow-400 font-bold">{score}</span></p>
+            
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Enter your name"
+              maxLength={12}
+              className="w-full p-3 mb-4 rounded bg-gray-800 text-white text-center font-mono text-lg focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+
+            <div className="space-y-3">
+              <StartButton
+                callback={handleSaveScore}
+                text="Save & Main Menu"
+                variant="primary"
+                ariaLabel="Save score and return to main menu"
+              />
+              <StartButton
+                callback={startGame}
+                text="Play Again"
+                variant="secondary"
+                ariaLabel="Start a new game of Tetris"
+              />
+            </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div
       id="game-area"
       ref={gameAreaRef}
-      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none relative"
+      className="w-full h-full flex flex-col justify-start items-center gap-4 outline-none"
       role="button"
       tabIndex={0}
       onKeyDown={e => move(e)}
       onKeyUp={keyUp}
       aria-label="Game Area"
     >
-      <div className="w-full max-w-xs relative">
+      <div className="w-full max-w-sm relative">
         <Stage stage={stage} />
-        {gameOver ? (
-          <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
-            <div>
-              <h2 className="text-xl font-bold text-red-500">Game Over</h2>
-              <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
-            </div>
-          </div>
-        ) : isPaused && (
+        {isPaused && (
           <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center rounded-lg">
             <p className="text-white text-2xl font-bold">PAUSED</p>
           </div>
         )}
       </div>
 
-      <aside className="w-full max-w-xs flex flex-col gap-3">
+      <aside className="w-full max-w-sm flex flex-col gap-3">
         <div className="grid grid-cols-3 gap-2">
           <Display label="Score" value={score} />
           <Display label="Rows" value={rows} />
           <Display label="Level" value={level} />
         </div>
         
-        <div className="flex items-stretch gap-2">
-          <div className="flex-grow">
-            {gameOver ? (
-              <StartButton
-                callback={startGame}
-                text="Start Game"
-                variant="primary"
-                ariaLabel="Start a new game of Tetris"
-              />
-            ) : (
-              <StartButton
-                callback={togglePause}
-                text={isPaused ? 'Resume' : 'Pause'}
-                variant="secondary"
-                ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
-              />
-            )}
-          </div>
-          <button
-            onClick={() => setShowHelp(true)}
-            className="flex-shrink-0 w-12 bg-gray-600 hover:bg-gray-500 rounded-lg flex items-center justify-center text-white font-bold text-2xl focus:outline-none focus:ring-4 focus:ring-gray-400 transition-all duration-200 ease-in-out shadow-md"
-            aria-label="Show controls help"
-          >
-            ?
-          </button>
-        </div>
-      </aside>
+        {gameOver ? (
+          <StartButton
+            callback={startGame}
+            text="Start Game"
+            variant="primary"
+            ariaLabel="Start a new game of Tetris"
+          />
+        ) : (
+          <StartButton
+            callback={togglePause}
+            text={isPaused ? 'Resume' : 'Pause'}
+            variant="secondary"
+            ariaLabel={isPaused ? 'Resume Game' : 'Pause Game'}
+          />
+        )}
 
-      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+        <div className="text-gray-400 text-xs p-3 bg-gray-800 rounded-md">
+          <h3 className="font-bold text-white mb-2 text-center uppercase tracking-wider">Controls</h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">W</span> Rotate</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">D</span> Move Right</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">A</span> Move Left</p>
+            <p className="flex items-center gap-2"><span className="font-bold text-cyan-400 text-base w-6 text-center">S</span> Soft Drop</p>
+            <p className="flex items-center gap-2 col-span-2 justify-center mt-1"><span className="font-bold text-cyan-400 text-base w-6 text-center">P</span> Pause</p>
+          </div>
+        </div>
+        <button onClick={onGoHome} className="w-full text-center text-gray-500 hover:text-gray-300 transition-colors py-1 text-sm rounded-lg hover:bg-gray-700">
+            Main Menu
+        </button>
+      </aside>
     </div>
   );
 };
