@@ -21,13 +21,15 @@ const App: React.FC = () => {
         displayName: userData.displayName,
         pfp: userData.pfpUrl,
       });
+    } else {
+      setUser(null);
     }
   };
 
   React.useEffect(() => {
     sdk.actions.ready();
     // Check for existing user data
-    sdk.getFarcasterUser().then(handleSetUser).catch(console.error);
+    sdk.getFarcasterUser().then(handleSetUser).catch(() => setUser(null));
   }, []);
 
   const handleLogin = () => {

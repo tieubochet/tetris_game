@@ -157,6 +157,7 @@ const Tetris: React.FC<TetrisProps> = ({ user }) => {
           <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center text-center rounded-lg">
             <div>
               <h2 className="text-xl font-bold text-red-500">Game Over</h2>
+              {user && <p className="text-lg text-white mt-2">{user.displayName}</p>}
               <p className="text-gray-300 mt-1 text-sm">Final Score: {score}</p>
             </div>
           </div>
